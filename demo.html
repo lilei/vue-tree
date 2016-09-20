@@ -1,0 +1,157 @@
+<html lang="zh-CN">
+<head>
+	<title>tree demo</title>
+	<style type="text/css">
+		ul.tree {
+			padding: 3px;
+		}
+		.tree ul {
+			padding: 0 0 0 25px;
+		}
+		.tree li{
+			list-style-type:none;
+		}
+		span.tree-expander,
+		span.tree-icon {
+		  width: 16px;
+		  height: 16px;
+		  display: inline-block;
+		  vertical-align: top;
+		  background-repeat: no-repeat;
+		  background-position: left;
+		  background-image: url("image/icons.gif");
+		  background-position: 0px 0px;
+		}
+		/*------------------------------------------------------------------------------
+		 * Expander icon
+		 *----------------------------------------------------------------------------*/
+		span.tree-expander {
+		  cursor: pointer;
+		}
+		.tree-expander-none span.tree-expander {
+		  background-image: none;
+		  cursor: default;
+		}
+		.tree-expander-collapsed span.tree-expander {
+		  background-position: 0px -80px;
+		}
+		.tree-expander-collapsed span.tree-expander:hover {
+		  background-position: -16px -80px;
+		}
+		.tree-expander-expanded span.tree-expander{
+		  background-position: -32px -80px;
+		}
+		.tree-expander-expanded span.tree-expander:hover{
+		  background-position: -48px -80px;
+		}
+		/*------------------------------------------------------------------------------
+		 * Node type icon
+		 *----------------------------------------------------------------------------*/
+		 /* Documents */
+		.tree-ico-doc span.tree-icon {
+		  background-position: 0px 0px;
+		}
+		/* Folders */
+		.tree-ico-folder span.tree-icon {
+		  background-position: 0px -16px;
+		}
+	</style>
+</head>
+<body>
+	<script type="text/x-template" id="item-template">
+	<li>
+		<span @click="toggle"  class="{{getClassName()}}">
+			<span class="tree-expander"></span>
+			<span class="tree-icon"></span>
+			<span class="tree-title">{{node.text}}</span>
+		</span>
+		<ul v-if = "hasChildren" v-show = "expanded">
+			<item v-for = "node in node.children"  :node = "node">
+			</item>
+		</ul>
+	</li>
+	</script>
+
+	<div id="tree-container">
+		<ul id = "tree" class = "tree">
+			<item v-for = "node in treeData" :node = "node">
+			</item>
+		</ul>
+	</div>
+
+	<script src="js/vue.min.js"></script>
+	<script type="text/javascript">
+
+	var data = [
+		{expand:"collapsed",type:"folder",text:"item1",
+		 children:[
+			{expand:"expanded",type:"folder",text:"item4"},
+			{expand:"none",type:"doc",text:"item5"}
+		 ]
+		},
+		{expand:"expanded",type:"folder",text:"item2",
+		 children:[
+			{expand:"none",type:"doc",text:"item4"},
+			{expand:"collapsed",type:"folder",text:"item5",
+				children:[
+					{expand:"expanded",type:"folder",text:"item2"},
+					{expand:"none",type:"doc",text:"item3"}
+				]
+			}
+		 ]
+		},
+		{expand:"none",type:"doc",text:"item3"}
+		]
+
+	Vue.component('item',{
+		template: '#item-template',
+		replace: true,
+		props:{
+			node: Object
+		},
+		data: function(){
+			return {
+				expanded :false
+			}
+		},
+		computed: {
+			hasChildren:function(){
+				return this.node.children && this.node.children.length
+			}
+		},
+		methods:{
+			getClassName:function(){
+				var className = "";
+				if (this.hasChildren) {
+					if (this.expanded) {
+						className += "tree-expander-expanded"
+					}else{
+						className += "tree-expander-collapsed"
+					}
+				}else{
+					className += "tree-expander-none"
+				}
+
+				if (this.node.type == "folder") {
+					className += " tree-ico-folder"
+				}else if(this.node.type == "doc"){
+					className += " tree-ico-doc"
+				}
+				return className;
+			},
+			toggle: function(){
+				this.expanded = !this.expanded	
+			}
+		}
+
+	})
+
+	new Vue({
+		el: '#tree',
+		data:{
+			treeData: data
+		}
+	})
+	</script>
+</body>
+</html>
